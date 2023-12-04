@@ -15,23 +15,28 @@ from src.utils.init_path import init_path
 import multiprocessing as mp
 
 
-def initialize_in_parallel(class_constructor, sadtalker_paths, device):
-    obj = class_constructor(sadtalker_paths, device)
+def initialize_in_parallel(class_constructor, params):
+    obj = class_constructor(*params)
     return obj
 
 def createInstance(sadtalker_paths, device):
     num_processes = 3
 
     # List of class constructors to run in parallel
-    class_constructors = [CropAndExtract, Audio2Coeff, AnimateFromCoeff]
+    # class_constructors = [CropAndExtract, Audio2Coeff, AnimateFromCoeff]
 
     # Names for instances
-    instance_names = [(sadtalker_paths, device), (sadtalker_paths, device), (sadtalker_paths, device)]
-
+    # instance_names = [(sadtalker_paths, device), (sadtalker_paths, device), (sadtalker_paths, device)]
+    
+    params = (sadtalker_paths, device)
+    
+    mp.set_start_method('spawn', force=True)
     # Use a Pool to run the class constructors in parallel
     with mp.Pool(processes=num_processes) as pool:
-        instances = pool.starmap(initialize_in_parallel, zip(class_constructors, instance_names))
-
+        # instances = pool.starmap(initialize_in_parallel, zip(class_constructors, instance_names))
+        instances = pool.starmap(initialize_in_parallel, [(CropAndExtract, params),
+                                          (Audio2Coeff, params),
+                                          (AnimateFromCoeff, params)])
     return instances
     
 
